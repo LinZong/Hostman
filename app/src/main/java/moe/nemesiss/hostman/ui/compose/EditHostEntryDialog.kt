@@ -83,12 +83,19 @@ private object IPV6HostEntryValidator : HostEntryValidator {
     }
 }
 
+fun interface HostEntryEditConfirmation {
+    /**
+     * Callback method while user is confirming a host entry create/edit action.
+     */
+    fun onConfirmation(previousEntry: HostEntry?, newEntry: HostEntry)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHostEntryDialog(
     entry: HostEntry? = null,
     onDismissRequest: () -> Unit = {},
-    onConfirmation: (HostEntry) -> Unit = {},
+    confirmation: HostEntryEditConfirmation = HostEntryEditConfirmation { _, _ -> }
 ) {
     val editing = entry != null
     var ipAddressTypeText by remember { mutableStateOf(TextFieldValue(text = if (entry?.ipv6 == true) IPV6 else IPV4)) }
@@ -123,8 +130,10 @@ fun EditHostEntryDialog(
         confirmButton = {
             TextButton(onClick = {
                 if (validation.isValid) {
-                    onConfirmation(HostEntry(hostName,
-                                             IPAddressString(hostAddress).toAddress(ipFamily).toInetAddress()))
+                    confirmation.onConfirmation(entry,
+                                                HostEntry(hostName,
+                                                          IPAddressString(hostAddress).toAddress(ipFamily)
+                                                              .toInetAddress()))
                 }
             }) {
                 Text("Confirm")

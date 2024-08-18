@@ -61,6 +61,4 @@ data class HostEntries(val ipv4: Map<String, HostEntry> = emptyMap(), val ipv6: 
         }
         return HostEntries(ipv4Entries, ipv6Entries)
     }
-
-
 }

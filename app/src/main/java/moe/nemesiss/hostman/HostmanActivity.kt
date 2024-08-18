@@ -37,8 +37,8 @@ import moe.nemesiss.hostman.model.viewmodel.ShizukuStateModel
 import moe.nemesiss.hostman.service.FileProviderService
 import moe.nemesiss.hostman.ui.compose.EditHostEntryDialog
 import moe.nemesiss.hostman.ui.compose.HostEntryItem
-import moe.nemesiss.hostman.ui.theme.HostmanTheme
 import moe.nemesiss.hostman.ui.theme.HostEntriesGroupNameColor
+import moe.nemesiss.hostman.ui.theme.HostmanTheme
 import rikka.shizuku.Shizuku
 import kotlin.system.exitProcess
 
@@ -146,8 +146,10 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                                     onDismissRequest = {
                                         vm.cleanEditingHostEntry()
                                     },
-                                    onConfirmation = {
-                                        fileProvider?.let { fp -> vm.updateHostEntry(context, fp, it) }
+                                    confirmation = { prev, curr ->
+                                        fileProvider?.let { fp ->
+                                            vm.updateHostEntry(context, fp, prev, curr)
+                                        }
                                     })
             }
 

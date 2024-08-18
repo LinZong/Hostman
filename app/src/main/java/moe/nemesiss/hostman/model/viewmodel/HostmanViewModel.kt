@@ -55,13 +55,20 @@ class HostmanViewModel : ViewModel() {
         }
     }
 
-    fun updateHostEntry(context: Context, fileProvider: IFileProvider, updatingHostEntry: HostEntry) {
-        Log.w(HostmanActivity.TAG, "Host entry was edited: $updatingHostEntry")
-        val newEntries = hostFileEntries.value?.updateHostEntries(updatingHostEntry) ?: return
+    fun updateHostEntry(context: Context,
+                        fileProvider: IFileProvider,
+                        previousHostEntry: HostEntry?,
+                        newHostEntry: HostEntry) {
+        Log.w(HostmanActivity.TAG, "Host entry was edited: $newHostEntry")
+        var entries: HostEntries? = hostFileEntries.value ?: return
+        if (previousHostEntry != null) {
+            entries = entries?.removeHostEntries(previousHostEntry)
+        }
+        entries = entries?.updateHostEntries(newHostEntry) ?: return
         viewModelScope.launch {
-            val result = writeHostEntriesToHostFile(context, fileProvider, newEntries)
+            val result = writeHostEntriesToHostFile(context, fileProvider, entries)
             if (result.success) {
-                hostFileEntries.update { newEntries }
+                hostFileEntries.update { entries }
             }
             cleanEditingHostEntry()
         }

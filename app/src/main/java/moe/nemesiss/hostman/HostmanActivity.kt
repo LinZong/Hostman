@@ -20,11 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.toColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +38,7 @@ import moe.nemesiss.hostman.service.FileProviderService
 import moe.nemesiss.hostman.ui.compose.EditHostEntryDialog
 import moe.nemesiss.hostman.ui.compose.HostEntryItem
 import moe.nemesiss.hostman.ui.theme.HostmanTheme
+import moe.nemesiss.hostman.ui.theme.HostEntriesGroupNameColor
 import rikka.shizuku.Shizuku
 import kotlin.system.exitProcess
 
@@ -160,7 +159,7 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                             item(key = key) {
                                 ListItem(headlineContent = {
                                     Text(text = key,
-                                         color = Color("#2467d4".toColorInt()),
+                                         color = HostEntriesGroupNameColor,
                                          fontSize = 18.sp)
                                 })
                             }

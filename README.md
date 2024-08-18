@@ -14,8 +14,8 @@ favourite approach in advance.**
 
 ## Screenshots
 
-| Request Permission                               | HomePage                                      | Create                                           | Edit                              | Delete                                                          |
-|--------------------------------------------------|-----------------------------------------------|--------------------------------------------------|-----------------------------------|-----------------------------------------------------------------|
-| ![Creating Host Entry](./docs/images/create.jpg) | ![Editing Host Entry](./docs/images/edit.jpg) | ![Deleting Host Entry](./docs/images/delete.jpg) | ![App HP](./docs/images/main.jpg) | ![ Request Permission ](./docs/images/requsting-permission.jpg) | 
+| Request Permission                                             | HomePage                      | Create                              | Edit                            | Delete                              |
+|----------------------------------------------------------------|-------------------------------|-------------------------------------|---------------------------------|-------------------------------------|
+| ![Creating Host Entry](./docs/images/requsting-permission.jpg) | ![HP](./docs/images/main.jpg) | ![Create](./docs/images/create.jpg) | ![Edit](./docs/images/edit.jpg) | ![Delete](./docs/images/delete.jpg) | 
 
 

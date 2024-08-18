@@ -134,7 +134,7 @@ fun EditHostEntryDialog(
         },
         title = { Text(text = title) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = {
@@ -147,7 +147,6 @@ fun EditHostEntryDialog(
                         // The `menuAnchor` modifier must be passed to the text field to handle
                         // expanding/collapsing the menu on click. An editable text field has
                         // the anchor type `PrimaryEditable`.
-                        enabled = enableIpAddressTypeSelection,
                         modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable,
                                                        enabled = enableIpAddressTypeSelection),
                         value = ipAddressTypeText,
@@ -166,6 +165,7 @@ fun EditHostEntryDialog(
                         },
                         colors = ExposedDropdownMenuDefaults.textFieldColors(),
                     )
+
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { setExpanded(false) },
@@ -194,11 +194,9 @@ fun EditHostEntryDialog(
                                            contentDescription = "Host Name")
                                   },
                                   label = { Text(text = "Host Name") },
-                                  supportingText = {
-                                      if (validation.hostNameValidationResult is HostNameInvalid) {
-                                          Text(text = validation.hostNameValidationResult.message)
-                                      }
-                                  },
+                                  supportingText = if (validation.hostNameValidationResult is HostNameInvalid) ({
+                                      Text(text = validation.hostNameValidationResult.message)
+                                  }) else null,
                                   isError = hostName.isNotEmpty() && validation.hostNameValidationResult is HostNameInvalid
                 )
 
@@ -213,11 +211,10 @@ fun EditHostEntryDialog(
                                   },
                                   label = { Text(text = "Host Address") },
                                   keyboardOptions = if (ipAddressTypeText.text == IPV4) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
-                                  supportingText = {
-                                      if (validation.ipAddressValidationResult is IPAddressInvalid) {
-                                          Text(text = validation.ipAddressValidationResult.message)
-                                      }
-                                  },
+                                  supportingText =
+                                  if (validation.ipAddressValidationResult is IPAddressInvalid)
+                                      ({ Text(text = validation.ipAddressValidationResult.message) })
+                                  else null,
                                   isError = hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid
                 )
             }

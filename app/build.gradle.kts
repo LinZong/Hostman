@@ -5,6 +5,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
+            keyAlias = "Nemesiss"
+            storePassword = project.properties["KEYSTORE_PASSWORD"].toString()
+            keyPassword = project.properties["KEYSTORE_PASSWORD"].toString()
+        }
+    }
     namespace = "moe.nemesiss.hostman"
     compileSdk = 34
 
@@ -24,12 +32,15 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "APPLICATION_NAME", "Hostman")
-            isMinifyEnabled = false
+            buildConfigField("String", "APPLICATION_NAME", "\"Hostman\"")
+            isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = ".debug"
             buildConfigField("String", "APPLICATION_NAME", "\"Hostman\"")
         }
     }

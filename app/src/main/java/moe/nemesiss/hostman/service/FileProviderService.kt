@@ -5,6 +5,7 @@ import android.os.Process
 import android.util.Log
 import androidx.annotation.Keep
 import com.alibaba.fastjson2.JSON
+import com.alibaba.fastjson2.toJSONString
 import moe.nemesiss.hostman.IFileProvider
 import moe.nemesiss.hostman.model.FileOperationResult
 import java.io.File
@@ -54,10 +55,10 @@ class FileProviderService : IFileProvider.Stub {
         try {
             File(filePath).writeBytes(fileContent)
             Log.w(TAG, "Write content to path: $filePath done!")
-            return JSON.toJSONString(FileOperationResult(true))
+            return FileOperationResult(true).toJSONString()
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to write content to $filePath", t)
-            return JSON.toJSONString(FileOperationResult(false, message = t.message ?: "Unknown error", exceptionStack = t.stackTraceToString()))
+            return FileOperationResult(false, message = t.message ?: "Unknown error", exceptionStack = t.stackTraceToString()).toJSONString()
         }
     }
 

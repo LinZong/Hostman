@@ -47,7 +47,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 netty-resolver = { group = "io.netty", name = "netty-resolver", version = "4.1.112.Final" }
-fastjson = { group = "com.alibaba.fastjson2", name = "fastjson2", version = "2.0.52.android8" }
+fastjson = { group = "com.alibaba.fastjson2", name = "fastjson2-kotlin", version = "2.0.52" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

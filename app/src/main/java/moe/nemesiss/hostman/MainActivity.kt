@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 import moe.nemesiss.hostman.model.viewmodel.ShizukuState
 import moe.nemesiss.hostman.model.viewmodel.ShizukuStateModel
 import moe.nemesiss.hostman.ui.theme.HostmanTheme
-import rikka.shizuku.Shizuku
 
 
 class MainActivity : ComponentActivity() {
@@ -37,9 +36,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Shizuku.addBinderReceivedListenerSticky(viewModel)
-        Shizuku.addBinderDeadListener(viewModel)
-        Shizuku.addRequestPermissionResultListener(viewModel)
 
         setContent {
             HostmanTheme {
@@ -58,12 +54,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onDestroy() {
-        Shizuku.removeBinderReceivedListener(viewModel)
-        Shizuku.removeBinderDeadListener(viewModel)
-        Shizuku.removeRequestPermissionResultListener(viewModel)
-        super.onDestroy()
-    }
 
     @Composable
     fun ShizukuStatePanel(state: ShizukuState) {

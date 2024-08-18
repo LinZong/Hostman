@@ -47,7 +47,7 @@ import kotlin.system.exitProcess
 class HostmanActivity : ComponentActivity(), ServiceConnection {
 
     companion object {
-        const val HOST_FILE_PATH = "/etc/hosts"
+
         const val TAG = "HostmanActivity"
     }
 

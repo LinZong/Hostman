@@ -43,7 +43,7 @@ class HostmanViewModel : ViewModel() {
             loading.value = true
             val begin = System.currentTimeMillis()
             val hostEntries = withContext(Dispatchers.IO) {
-                val hostContent = fileProvider.getFileTextContent(HostmanActivity.HOST_FILE_PATH)
+                val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH)
                 val nettyEntries = HostsFileParser.parse(StringReader(hostContent))
                 HostEntries.fromNettyHostFileEntries(nettyEntries)
             }
@@ -88,10 +88,10 @@ class HostmanViewModel : ViewModel() {
                                                    fileProvider: IFileProvider,
                                                    hostsFileEntries: HostEntries): FileOperationResult {
         savingContent.value = true
-        val hostFileContent = generateHostFileContent(hostsFileEntries)
+        val hostFileContent = hostsFileEntries.generateHostFileContent()
         val fileOperationResult = withContext(Dispatchers.IO) {
-            Log.w(HostmanActivity.TAG, "Saving content to host file: $hostFileContent")
-            val result = fileProvider.writeFileBytes(HostmanActivity.HOST_FILE_PATH,
+            Log.w(HostmanActivity.TAG, "Saving content: $hostFileContent to host file: ${HostEntries.HOST_FILE_PATH}")
+            val result = fileProvider.writeFileBytes(HostEntries.HOST_FILE_PATH,
                                                      hostFileContent.toByteArray(Charsets.UTF_8))
             val fileOperationResult = FileOperationResult.deserialize(result)
             fileOperationResult
@@ -105,18 +105,5 @@ class HostmanViewModel : ViewModel() {
                   "Failed to save content to host file. error: ${fileOperationResult.message}, stack: ${fileOperationResult.exceptionStack}")
         }
         return fileOperationResult
-    }
-
-
-    private fun generateHostFileContent(hostsFileEntries: HostEntries): String {
-        val content = StringBuilder()
-        hostsFileEntries.ipv4.forEach { (hostName, hostEntry) ->
-            content.append("${hostEntry.address.hostAddress}  ${hostName}\n")
-        }
-        content.append("\n\n")
-        hostsFileEntries.ipv6.forEach { (hostName, hostEntry) ->
-            content.append("${hostEntry.address.hostAddress}  ${hostName}\n")
-        }
-        return content.toString()
     }
 }

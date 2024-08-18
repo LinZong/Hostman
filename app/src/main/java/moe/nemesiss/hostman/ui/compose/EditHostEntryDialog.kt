@@ -94,6 +94,7 @@ fun EditHostEntryDialog(
     var ipAddressTypeText by remember { mutableStateOf(TextFieldValue(text = if (entry?.ipv6 == true) IPV6 else IPV4)) }
     val ipFamily = if (ipAddressTypeText.text == IPV6) IPAddress.IPVersion.IPV6 else IPAddress.IPVersion.IPV4
     val validator = if (ipFamily == IPAddress.IPVersion.IPV6) IPV6HostEntryValidator else IPV4HostEntryValidator
+    var validation by remember { mutableStateOf(HostEntryValidationResult(HostNameValid, IPAddressValid)) }
 
 
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
@@ -107,9 +108,13 @@ fun EditHostEntryDialog(
         mutableStateOf(entry?.address?.hostAddress ?: "")
     }
 
-    val validation = validator.validate(hostName, hostAddress)
+
+    LaunchedEffect(key1 = hostName, key2 = hostAddress) {
+        validation = validator.validate(hostName, hostAddress)
+    }
 
     val enableIpAddressTypeSelection = !editing
+
 
     AlertDialog(
         onDismissRequest = {
@@ -154,6 +159,7 @@ fun EditHostEntryDialog(
                         readOnly = true,
                         singleLine = true,
                         label = { Text("IP Address Type") },
+                        supportingText = {},
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(
                                 expanded = expanded, // If the text field is editable, it is recommended to make the
@@ -194,9 +200,11 @@ fun EditHostEntryDialog(
                                            contentDescription = "Host Name")
                                   },
                                   label = { Text(text = "Host Name") },
-                                  supportingText = if (validation.hostNameValidationResult is HostNameInvalid) ({
-                                      Text(text = validation.hostNameValidationResult.message)
-                                  }) else null,
+                                  supportingText = {
+                                      if (validation.hostNameValidationResult is HostNameInvalid) {
+                                          Text(text = (validation.hostNameValidationResult as HostNameInvalid).message)
+                                      }
+                                  },
                                   isError = hostName.isNotEmpty() && validation.hostNameValidationResult is HostNameInvalid
                 )
 
@@ -211,10 +219,11 @@ fun EditHostEntryDialog(
                                   },
                                   label = { Text(text = "Host Address") },
                                   keyboardOptions = if (ipAddressTypeText.text == IPV4) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
-                                  supportingText =
-                                  if (validation.ipAddressValidationResult is IPAddressInvalid)
-                                      ({ Text(text = validation.ipAddressValidationResult.message) })
-                                  else null,
+                                  supportingText = {
+                                      if (hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid) {
+                                          Text(text = (validation.ipAddressValidationResult as IPAddressInvalid).message)
+                                      }
+                                  },
                                   isError = hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid
                 )
             }

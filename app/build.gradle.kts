@@ -2,6 +2,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -89,6 +91,7 @@ dependencies {
     implementation(libs.netty.resolver)
     implementation(libs.fastjson)
     implementation(libs.ipaddress)
+    implementation(libs.installreferrer)
 
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.clazz)
@@ -101,6 +104,12 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-analytics")
+
 
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

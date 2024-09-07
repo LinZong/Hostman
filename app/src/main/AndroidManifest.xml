@@ -37,6 +37,10 @@
                 android:exported="true"
                 android:multiprocess="false"
                 android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+
+        <meta-data
+                android:name="firebase_performance_logcat_enabled"
+                android:value="true" />
     </application>
 
 </manifest>

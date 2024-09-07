@@ -6,6 +6,9 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
+import com.google.firebase.perf.metrics.AddTrace
+import com.google.firebase.perf.performance
 import io.netty.resolver.HostsFileParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -41,6 +44,8 @@ class HostmanViewModel : ViewModel() {
     fun loadHostFileEntries(fileProvider: IFileProvider) {
         viewModelScope.launch {
             loading.value = true
+            val trace = Firebase.performance.newTrace("load_host_file_entries")
+            trace.start()
             val begin = System.currentTimeMillis()
             val hostEntries = withContext(Dispatchers.IO) {
                 val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH)
@@ -48,6 +53,7 @@ class HostmanViewModel : ViewModel() {
                 HostEntries.fromNettyHostFileEntries(nettyEntries)
             }
             val end = System.currentTimeMillis()
+            trace.stop()
             val cost = ((end - begin).toInt()).coerceAtLeast(500).milliseconds
             delay(cost)
             hostFileEntries.value = hostEntries
@@ -91,6 +97,8 @@ class HostmanViewModel : ViewModel() {
         }
     }
 
+
+    @AddTrace(name = "write_host_entries_to_host_file")
     private suspend fun writeHostEntriesToHostFile(context: Context,
                                                    fileProvider: IFileProvider,
                                                    hostsFileEntries: HostEntries): FileOperationResult {

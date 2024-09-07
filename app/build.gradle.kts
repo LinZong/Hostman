@@ -1,3 +1,5 @@
+@file:Suppress("PropertyName")
+
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
@@ -6,9 +8,12 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    // Add the Performance Monitoring Gradle plugin
+    id("com.google.firebase.firebase-perf")
 }
-val version = file(rootDir.resolve("VERSION")).readText().trim()
-project.logger.warn("version: $version")
+val VERSION = file(rootDir.resolve("VERSION")).readText().trim()
+val VERSION_CODE = VERSION.replace(".", "").toInt()
+project.logger.warn("Using versionName: $VERSION, versionCode: $VERSION_CODE")
 
 android {
     signingConfigs {
@@ -33,8 +38,8 @@ android {
         applicationId = "moe.nemesiss.hostman"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = version
+        versionCode = VERSION_CODE
+        versionName = VERSION
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -121,6 +126,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-perf")
 
     // Barcode Scanner
     implementation(libs.barcode.scanning)

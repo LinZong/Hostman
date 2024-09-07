@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidApplication)
@@ -9,6 +11,13 @@ plugins {
 android {
     signingConfigs {
         create("release") {
+            storeFile = file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
+            keyAlias = "Nemesiss"
+            storePassword = project.properties["KEYSTORE_PASSWORD"].toString()
+            keyPassword = project.properties["KEYSTORE_PASSWORD"].toString()
+        }
+
+        create("debugSign") {
             storeFile = file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
             keyAlias = "Nemesiss"
             storePassword = project.properties["KEYSTORE_PASSWORD"].toString()
@@ -44,6 +53,7 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = ".debug"
             buildConfigField("String", "APPLICATION_NAME", "\"Hostman\"")
+            signingConfig = signingConfigs.getByName("debugSign")
         }
     }
     compileOptions {
@@ -110,9 +120,30 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
 
+    // Barcode Scanner
+    implementation(libs.barcode.scanning)
+
+
+    // CameraX
+    val cameraxVersion = "1.2.2"
+    implementation("androidx.camera:camera-core:${cameraxVersion}")
+    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    implementation("androidx.camera:camera-video:${cameraxVersion}")
+
+    implementation("androidx.camera:camera-view:${cameraxVersion}")
+    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+
 
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.runtime.livedata)
     implementation(kotlin("reflect"))
+}
+
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
+    }
 }

@@ -1,6 +1,9 @@
 package moe.nemesiss.hostman.model.viewmodel
 
+import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
+import android.widget.Toast
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,6 +14,8 @@ object ShizukuStateModel :
         Shizuku.OnBinderReceivedListener,
         Shizuku.OnBinderDeadListener,
         Shizuku.OnRequestPermissionResultListener {
+
+    private const val TAG = "ShizukuStateModel"
 
     private val shizukuPermissionCode = "SHIZUKU".hashCode()
 
@@ -65,8 +70,13 @@ object ShizukuStateModel :
         }
     }
 
-    fun requestShizukuPermission() {
-        Shizuku.requestPermission(shizukuPermissionCode)
+    fun requestShizukuPermission(context: Context) {
+        try {
+            Shizuku.requestPermission(shizukuPermissionCode)
+        } catch (t: Throwable) {
+            Toast.makeText(context, "Failed to request shizuku permission. ${t.message}", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Shizuku error", t)
+        }
     }
 }
 

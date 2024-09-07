@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -70,13 +70,13 @@ class MainActivity : ComponentActivity() {
                         Text(text = "Shizuku State", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     }
 
-                    Divider(modifier = Modifier.padding(horizontal = 8.dp))
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp))
 
                     Row(modifier = Modifier.padding(8.dp)) {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             if (!state.permissionGranted) {
                                 Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                                       onClick = { viewModel.requestShizukuPermission() }) {
+                                       onClick = { viewModel.requestShizukuPermission(this@MainActivity) }) {
                                     Text(text = "Request Shizuku Permission")
                                 }
                             } else if (state.connected) {

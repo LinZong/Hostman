@@ -143,7 +143,7 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
 
             if (showEditDialog) {
                 EditHostEntryDialog(entry = editingHostEntry,
-                                    onDismissRequest = {
+                                    dismiss = {
                                         vm.cleanEditingHostEntry()
                                     },
                                     confirmation = { prev, curr ->

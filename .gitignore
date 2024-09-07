@@ -329,3 +329,5 @@ obj/
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,android,intellij,kotlin,gradle
+install_debug.sh
+install_release.sh

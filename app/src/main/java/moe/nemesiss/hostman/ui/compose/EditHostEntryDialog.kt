@@ -2,6 +2,7 @@ package moe.nemesiss.hostman.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,7 +41,7 @@ private interface HostEntryValidator {
 private object IPV4HostEntryValidator : HostEntryValidator {
     override fun validate(hostName: String, hostAddress: String): HostEntryValidationResult {
         return HostEntryValidationResult(
-            hostNameValidationResult = if (hostName.isEmpty()) HostNameInvalid("Host name should not be empty") else HostNameValid,
+            hostNameValidationResult = if (hostName.isEmpty() && hostAddress.isNotEmpty()) HostNameInvalid("Host name should not be empty") else HostNameValid,
             ipAddressValidationResult = validateIPV4Address(hostAddress)
         )
     }
@@ -64,7 +65,7 @@ private object IPV6HostEntryValidator : HostEntryValidator {
 
     override fun validate(hostName: String, hostAddress: String): HostEntryValidationResult {
         return HostEntryValidationResult(
-            hostNameValidationResult = if (hostName.isEmpty()) HostNameInvalid("Host name should not be empty") else HostNameValid,
+            hostNameValidationResult = if (hostName.isEmpty() && hostAddress.isNotEmpty()) HostNameInvalid("Host name should not be empty") else HostNameValid,
             ipAddressValidationResult = validateIPV6Address(hostAddress)
         )
     }
@@ -94,14 +95,14 @@ fun interface HostEntryEditConfirmation {
 @Composable
 fun EditHostEntryDialog(
     entry: HostEntry? = null,
-    onDismissRequest: () -> Unit = {},
+    dismiss: () -> Unit = {},
     confirmation: HostEntryEditConfirmation = HostEntryEditConfirmation { _, _ -> }
 ) {
     val editing = entry != null
     var ipAddressTypeText by remember { mutableStateOf(TextFieldValue(text = if (entry?.ipv6 == true) IPV6 else IPV4)) }
     val ipFamily = if (ipAddressTypeText.text == IPV6) IPAddress.IPVersion.IPV6 else IPAddress.IPVersion.IPV4
     val validator = if (ipFamily == IPAddress.IPVersion.IPV6) IPV6HostEntryValidator else IPV4HostEntryValidator
-    var validation by remember { mutableStateOf(HostEntryValidationResult(HostNameValid, IPAddressValid)) }
+    val validation: HostEntryValidationResult
 
 
     val (expanded, setExpanded) = remember { mutableStateOf(false) }
@@ -116,16 +117,14 @@ fun EditHostEntryDialog(
     }
 
 
-    LaunchedEffect(key1 = hostName, key2 = hostAddress) {
-        validation = validator.validate(hostName, hostAddress)
-    }
+    validation = validator.validate(hostName, hostAddress)
 
     val enableIpAddressTypeSelection = !editing
 
 
     AlertDialog(
         onDismissRequest = {
-            onDismissRequest()
+            dismiss()
         },
         confirmButton = {
             TextButton(onClick = {
@@ -141,7 +140,7 @@ fun EditHostEntryDialog(
         },
         dismissButton = {
             TextButton(onClick = {
-                onDismissRequest()
+                dismiss()
             }) {
                 Text("Cancel")
             }
@@ -168,7 +167,6 @@ fun EditHostEntryDialog(
                         readOnly = true,
                         singleLine = true,
                         label = { Text("IP Address Type") },
-                        supportingText = {},
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(
                                 expanded = expanded, // If the text field is editable, it is recommended to make the
@@ -199,42 +197,60 @@ fun EditHostEntryDialog(
                     }
                 }
 
-                OutlinedTextField(value = hostName,
-                                  onValueChange = {
-                                      hostName = it
-                                  },
-                                  singleLine = true,
-                                  leadingIcon = {
-                                      Icon(painter = painterResource(id = R.drawable.link_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                                           contentDescription = "Host Name")
-                                  },
-                                  label = { Text(text = "Host Name") },
-                                  supportingText = {
-                                      if (validation.hostNameValidationResult is HostNameInvalid) {
-                                          Text(text = (validation.hostNameValidationResult as HostNameInvalid).message)
-                                      }
-                                  },
-                                  isError = hostName.isNotEmpty() && validation.hostNameValidationResult is HostNameInvalid
-                )
+                val hostNameError = validation.hostNameValidationResult is HostNameInvalid
+                Column {
+                    OutlinedTextField(value = hostName,
+                                      onValueChange = {
+                                          hostName = it
+                                      },
+                                      singleLine = true,
+                                      leadingIcon = {
+                                          Icon(painter = painterResource(id = R.drawable.link_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                                               contentDescription = "Host Name")
+                                      },
+                                      label = { Text(text = "Host Name") },
+                                      isError = hostNameError
+                    )
 
-                OutlinedTextField(value = hostAddress,
-                                  onValueChange = {
-                                      hostAddress = it
-                                  },
-                                  singleLine = true,
-                                  leadingIcon = {
-                                      Icon(painter = painterResource(id = R.drawable.dns_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                                           contentDescription = "Host Address")
-                                  },
-                                  label = { Text(text = "Host Address") },
-                                  keyboardOptions = if (ipAddressTypeText.text == IPV4) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
-                                  supportingText = {
-                                      if (hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid) {
-                                          Text(text = (validation.ipAddressValidationResult as IPAddressInvalid).message)
-                                      }
-                                  },
-                                  isError = hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid
-                )
+                    // Use hand-crafted supportingText instead of built-in one
+                    // in order to prevent from losing TextField focus while supportingText is appearing or disappearing.
+                    if (hostNameError) {
+                        Text(
+                            text = (validation.hostNameValidationResult as HostNameInvalid).message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+
+                val hostAddressError =
+                    hostAddress.isNotEmpty() && validation.ipAddressValidationResult is IPAddressInvalid
+
+                Column {
+                    OutlinedTextField(value = hostAddress,
+                                      onValueChange = {
+                                          hostAddress = it
+                                      },
+                                      singleLine = true,
+                                      leadingIcon = {
+                                          Icon(painter = painterResource(id = R.drawable.dns_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                                               contentDescription = "Host Address")
+                                      },
+                                      label = { Text(text = "Host Address") },
+                                      keyboardOptions = if (ipAddressTypeText.text == IPV4) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
+                                      isError = hostAddressError
+                    )
+
+                    if (hostAddressError) {
+                        Text(
+                            text = (validation.ipAddressValidationResult as IPAddressInvalid).message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
             }
         })
 }

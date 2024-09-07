@@ -7,6 +7,8 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
 }
+val version = file(rootDir.resolve("VERSION")).readText().trim()
+project.logger.warn("version: $version")
 
 android {
     signingConfigs {
@@ -32,7 +34,7 @@ android {
         minSdk = 29
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = version
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -331,3 +331,4 @@ obj/
 # End of https://www.toptal.com/developers/gitignore/api/androidstudio,android,intellij,kotlin,gradle
 install_debug.sh
 install_release.sh
+/aliyun-emas-services.json

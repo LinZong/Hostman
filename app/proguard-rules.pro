@@ -19,13 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class io.netty.*  { *; }
--keep class org.apache.*  { *; }
--keep class org.slf4j.*  { *; }
--keep class org.apache.*  { *; }
--keep class reactor.blockhound.*  { *; }
--keep class com.alibaba.*  { *; }
--keep public class com.alibaba.fastjson2.*  { *; }
+-keep class io.netty.**  { *; }
+-keep class org.apache.**  { *; }
+-keep class org.slf4j.**  { *; }
+-keep class org.apache.**  { *; }
+-keep class reactor.blockhound.**  { *; }
+-keep class com.alibaba.**  { *; }
+-keep class com.alibaba.fastjson2.**  { *; }
+-keep class kotlin.**  { *; }
+-keep class kotlinx.**  { *; }
 -keep class * implements moe.nemesiss.hostman.proguard.NoProguard { *; }
 -dontwarn **
 

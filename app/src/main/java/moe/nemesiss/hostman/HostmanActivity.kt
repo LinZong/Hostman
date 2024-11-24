@@ -166,8 +166,8 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                                 })
                             }
 
-                            for (entry in entries.values) {
-                                item(key = entry.key) {
+                            for ((index, entry) in entries.values.withIndex()) {
+                                item(key = key + "-" + entry.key + "-" + index) {
                                     Box(modifier = Modifier
                                         .clickable {
                                             if (!loading) {

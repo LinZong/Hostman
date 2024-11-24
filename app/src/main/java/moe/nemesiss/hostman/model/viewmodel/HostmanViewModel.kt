@@ -1,7 +1,6 @@
 package moe.nemesiss.hostman.model.viewmodel
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import moe.nemesiss.hostman.HostmanActivity
 import moe.nemesiss.hostman.IFileProvider
+import moe.nemesiss.hostman.boost.EasyDebug
 import moe.nemesiss.hostman.boost.update
 import moe.nemesiss.hostman.model.FileOperationResult
 import moe.nemesiss.hostman.model.HostEntries
@@ -25,6 +25,9 @@ import java.io.StringReader
 import kotlin.time.Duration.Companion.milliseconds
 
 class HostmanViewModel : ViewModel() {
+
+    val TAG = "HostmanViewModel"
+
     val loading = MutableLiveData(true)
     val hostFileEntries = MutableLiveData(HostEntries(emptyMap(), emptyMap()))
     val showEditDialog = MutableLiveData(false)
@@ -49,9 +52,11 @@ class HostmanViewModel : ViewModel() {
             val begin = System.currentTimeMillis()
             val hostEntries = withContext(Dispatchers.IO) {
                 val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH)
+                EasyDebug.warn(TAG) { "Got host file content: $hostContent" }
                 val nettyEntries = HostsFileParser.parse(StringReader(hostContent))
                 HostEntries.fromNettyHostFileEntries(nettyEntries)
             }
+            EasyDebug.warn(TAG) { "Got host file entries: $hostEntries" }
             val end = System.currentTimeMillis()
             trace.stop()
             val cost = ((end - begin).toInt()).coerceAtLeast(500).milliseconds
@@ -65,7 +70,7 @@ class HostmanViewModel : ViewModel() {
                         fileProvider: IFileProvider,
                         previousHostEntry: HostEntry?,
                         newHostEntry: HostEntry) {
-        Log.w(HostmanActivity.TAG, "Host entry was edited: $newHostEntry")
+        EasyDebug.warn(HostmanActivity.TAG) { "Host entry was edited: $newHostEntry" }
         var entries: HostEntries? = hostFileEntries.value ?: return
         if (previousHostEntry != null) {
             entries = entries?.removeHostEntries(previousHostEntry)
@@ -105,7 +110,7 @@ class HostmanViewModel : ViewModel() {
         savingContent.value = true
         val hostFileContent = hostsFileEntries.generateHostFileContent()
         val fileOperationResult = withContext(Dispatchers.IO) {
-            Log.w(HostmanActivity.TAG, "Saving content: $hostFileContent to host file: ${HostEntries.HOST_FILE_PATH}")
+            EasyDebug.warn(HostmanActivity.TAG) { "Saving content: $hostFileContent to host file: ${HostEntries.HOST_FILE_PATH}" }
             val result = fileProvider.writeFileBytes(HostEntries.HOST_FILE_PATH,
                                                      hostFileContent.toByteArray(Charsets.UTF_8))
             val fileOperationResult = FileOperationResult.deserialize(result)
@@ -116,8 +121,10 @@ class HostmanViewModel : ViewModel() {
             Toast.makeText(context,
                            "Failed to write host file. ${fileOperationResult.message}",
                            Toast.LENGTH_SHORT).show()
-            Log.e(HostmanActivity.TAG,
-                  "Failed to save content to host file. error: ${fileOperationResult.message}, stack: ${fileOperationResult.exceptionStack}")
+
+            EasyDebug.error(HostmanActivity.TAG) {
+                "Failed to save content to host file. error: ${fileOperationResult.message}, stack: ${fileOperationResult.exceptionStack}"
+            }
         }
         return fileOperationResult
     }

@@ -129,7 +129,7 @@ dependencies {
     implementation("com.google.firebase:firebase-perf")
 
     // Barcode Scanner
-    implementation(libs.barcode.scanning)
+    // implementation(libs.barcode.scanning)
 
 
     // CameraX

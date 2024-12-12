@@ -86,7 +86,7 @@ data class ShizukuState(
     val permissionGranted: Boolean = false,
     val uid: Int = -1,
     val version: Int = -1,
-    val selinuxContext: String = ""
+    val selinuxContext: String? = ""
 ) {
     val looksGoodToMe: Boolean get() = connected && permissionGranted && runningMode == ShizukuRunningMode.ROOT
     val runningMode: ShizukuRunningMode

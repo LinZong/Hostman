@@ -33,10 +33,9 @@ class HostmanApplication : Application() {
         Shizuku.removeBinderReceivedListener(ShizukuStateModel)
         Shizuku.removeBinderDeadListener(ShizukuStateModel)
         Shizuku.removeRequestPermissionResultListener(ShizukuStateModel)
-        NetService.close()
+        shutdownServices()
         super.onTerminate()
     }
-
 
 
     override fun attachBaseContext(base: Context?) {
@@ -47,6 +46,8 @@ class HostmanApplication : Application() {
     }
 
     private fun shutdownServices() {
-
+        runCatching {
+            NetService.close()
+        }
     }
 }

@@ -1,6 +1,7 @@
 @file:Suppress("PropertyName")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import io.sentry.android.gradle.extensions.InstrumentationFeature
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
@@ -37,6 +38,11 @@ fun getStoreFile(buildType: String): File {
     }
 }
 
+sentry {
+    org.set("nemesisslin")
+    projectName.set("hostman")
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN"))
+}
 
 android {
     signingConfigs {

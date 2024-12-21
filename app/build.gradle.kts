@@ -15,17 +15,37 @@ val VERSION = file(rootDir.resolve("VERSION")).readText().trim()
 val VERSION_CODE = VERSION.replace(".", "").toInt()
 project.logger.warn("Using versionName: $VERSION, versionCode: $VERSION_CODE")
 
+fun isJenkins(): Boolean {
+    return System.getenv("JENKINS_HOME")?.isNotEmpty() ?: false
+}
+
+
+fun getAndroidHome(): String {
+    return System.getenv("ANDROID_HOME") ?: ""
+}
+
+fun getStoreFile(buildType: String): File {
+    return if (isJenkins()) {
+        require(getAndroidHome().isNotEmpty()) { "Cannot locate ANDROID_HOME from environment variable." }
+        file(getAndroidHome()).resolve("keystore/Nemesiss.keystore")
+    } else {
+        // Local build
+        file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
+    }
+}
+
+
 android {
     signingConfigs {
         create("release") {
-            storeFile = file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
+            storeFile = getStoreFile("release")
             keyAlias = "Nemesiss"
             storePassword = project.properties["KEYSTORE_PASSWORD"].toString()
             keyPassword = project.properties["KEYSTORE_PASSWORD"].toString()
         }
 
         create("debugSign") {
-            storeFile = file("/Users/nemesisslin/Library/CloudStorage/OneDrive-Personal/SSHKey/Nemesiss.keystore")
+            storeFile = getStoreFile("debug")
             keyAlias = "Nemesiss"
             storePassword = project.properties["KEYSTORE_PASSWORD"].toString()
             keyPassword = project.properties["KEYSTORE_PASSWORD"].toString()
@@ -133,15 +153,14 @@ dependencies {
 
 
     // CameraX
-//    val cameraxVersion = "1.2.2"
-//    implementation("androidx.camera:camera-core:${cameraxVersion}")
-//    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
-//    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
-//    implementation("androidx.camera:camera-video:${cameraxVersion}")
-//
-//    implementation("androidx.camera:camera-view:${cameraxVersion}")
-//    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
-
+    //    val cameraxVersion = "1.2.2"
+    //    implementation("androidx.camera:camera-core:${cameraxVersion}")
+    //    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    //    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    //    implementation("androidx.camera:camera-video:${cameraxVersion}")
+    //
+    //    implementation("androidx.camera:camera-view:${cameraxVersion}")
+    //    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
 
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

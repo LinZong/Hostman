@@ -15,7 +15,6 @@ object EasyDebug {
         val msg = block()
         Log.i(tag, msg)
         Firebase.crashlytics.log("[INFO] $tag $msg")
-        Sentry.captureMessage(msg, SentryLevel.INFO)
     }
 
     fun warn(tag: String, block: () -> String) {

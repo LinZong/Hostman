@@ -1,5 +1,7 @@
 package moe.nemesiss.hostman.model
 
+import moe.nemesiss.hostman.proguard.NoProguard
+
 
 data class GithubRelease(
     val url: String,
@@ -19,7 +21,7 @@ data class GithubRelease(
     val tarball_url: String,
     val zipball_url: String,
     val body: String
-)
+) : NoProguard
 
 
 data class Asset(
@@ -35,5 +37,4 @@ data class Asset(
     val created_at: String,
     val updated_at: String,
     val browser_download_url: String
-)
-
+) : NoProguard

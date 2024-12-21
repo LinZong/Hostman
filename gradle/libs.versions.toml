@@ -9,6 +9,7 @@ core-ktx = "1.13.1"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
+ktor-ktor-client-core = "3.0.2"
 lifecycle-runtime-ktx = "2.8.7"
 activity-compose = "1.9.3"
 compose-bom = "2024.11.00"
@@ -34,6 +35,8 @@ ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddre
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor-ktor-client-core" }
+ktor-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor-ktor-client-core" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }

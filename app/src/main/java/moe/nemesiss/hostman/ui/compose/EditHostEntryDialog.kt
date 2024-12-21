@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -15,9 +16,11 @@ import androidx.compose.ui.unit.dp
 import inet.ipaddr.IPAddress
 import inet.ipaddr.IPAddressString
 import moe.nemesiss.hostman.R
+import moe.nemesiss.hostman.boost.EasyDebug
 
 private const val IPV4 = "IPV4"
 private const val IPV6 = "IPV6"
+private const val TAG = "EditHostEntryDialog"
 private val ipAddressOptions = listOf(IPV4, IPV6)
 
 sealed class HostNameValidationResult
@@ -91,6 +94,7 @@ fun interface HostEntryEditConfirmation {
     fun onConfirmation(previousEntry: HostEntry?, newEntry: HostEntry)
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditHostEntryDialog(
@@ -129,20 +133,22 @@ fun EditHostEntryDialog(
         confirmButton = {
             TextButton(onClick = {
                 if (validation.isValid) {
-                    confirmation.onConfirmation(entry,
-                                                HostEntry(hostName,
-                                                          IPAddressString(hostAddress).toAddress(ipFamily)
-                                                              .toInetAddress()))
+                    IPAddressString(hostAddress).toAddress(ipFamily)?.let { ipAddress ->
+                        val hostEntry = HostEntry(hostName, ipAddress.toInetAddress())
+                        confirmation.onConfirmation(hostEntry, hostEntry)
+                    } ?: run {
+                        EasyDebug.error(TAG) { "Failed to convert hostAddress: $hostAddress to IPAddress in family: $ipFamily through validation was passed, method returns null." }
+                    }
                 }
             }) {
-                Text("Confirm")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = {
                 dismiss()
             }) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         title = { Text(text = title) },
@@ -206,9 +212,9 @@ fun EditHostEntryDialog(
                                       singleLine = true,
                                       leadingIcon = {
                                           Icon(painter = painterResource(id = R.drawable.link_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                                               contentDescription = "Host Name")
+                                               contentDescription = stringResource(R.string.host_name))
                                       },
-                                      label = { Text(text = "Host Name") },
+                                      label = { Text(text = stringResource(id = R.string.host_name)) },
                                       isError = hostNameError
                     )
 
@@ -235,9 +241,9 @@ fun EditHostEntryDialog(
                                       singleLine = true,
                                       leadingIcon = {
                                           Icon(painter = painterResource(id = R.drawable.dns_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                                               contentDescription = "Host Address")
+                                               contentDescription = stringResource(R.string.host_address))
                                       },
-                                      label = { Text(text = "Host Address") },
+                                      label = { Text(text = stringResource(R.string.host_address)) },
                                       keyboardOptions = if (ipAddressTypeText.text == IPV4) KeyboardOptions(keyboardType = KeyboardType.Decimal) else KeyboardOptions.Default,
                                       isError = hostAddressError
                     )

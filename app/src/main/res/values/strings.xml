@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Hostman</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="host_address">Host Address</string>
+    <string name="host_name">Host Name</string>
+    <string name="download">Download</string>
+    <string name="shutdown">Shutdown</string>
 </resources>

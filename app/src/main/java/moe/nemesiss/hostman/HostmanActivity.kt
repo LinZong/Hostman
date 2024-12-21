@@ -8,9 +8,11 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.Add
@@ -20,8 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,11 +37,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import moe.nemesiss.hostman.model.HostEntries
+import moe.nemesiss.hostman.model.viewmodel.CheckUpdateViewModel
 import moe.nemesiss.hostman.model.viewmodel.HostmanViewModel
 import moe.nemesiss.hostman.model.viewmodel.ShizukuStateModel
 import moe.nemesiss.hostman.service.FileProviderService
 import moe.nemesiss.hostman.ui.compose.EditHostEntryDialog
 import moe.nemesiss.hostman.ui.compose.HostEntryItem
+import moe.nemesiss.hostman.ui.compose.NewVersionDialog
 import moe.nemesiss.hostman.ui.theme.HostEntriesGroupNameColor
 import moe.nemesiss.hostman.ui.theme.HostmanTheme
 import rikka.shizuku.Shizuku
@@ -51,6 +58,8 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
     }
 
     private val vm by viewModels<HostmanViewModel>()
+
+    private val checkUpdateModel by viewModels<CheckUpdateViewModel>()
 
     private var fileProvider: IFileProvider? = null
 
@@ -78,21 +87,47 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
         val loading = vm.loading.observeAsState(true).value
         val savingContent = vm.savingContent.observeAsState(false).value
         val connected = fileProviderConnected.collectAsStateWithLifecycle().value
+
+        val latestVersionAvailable = checkUpdateModel.hasLatestVersion.observeAsState(false).value
+        val latestVersion = checkUpdateModel.latestVersion.observeAsState().value
+        val showNewVersionDialog = checkUpdateModel.newVersionAvailableDialogShown.observeAsState(false).value
+
         Scaffold(
             topBar = {
                 Column {
                     TopAppBar(
                         title = {
-                            Text(BuildConfig.APPLICATION_NAME, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Box(modifier = Modifier.wrapContentSize()) {
+                                var textModifier = Modifier.padding(2.dp)
+                                if (latestVersionAvailable) {
+                                    textModifier = textModifier.clickable {
+                                        checkUpdateModel.showNewVersionDialog()
+                                    }
+                                }
+                                Text(BuildConfig.APPLICATION_NAME,
+                                     maxLines = 1,
+                                     overflow = TextOverflow.Ellipsis,
+                                     modifier = textModifier)
+                                if (latestVersionAvailable) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(4.dp) // Size of the red dot
+                                            .background(Color.Red, shape = CircleShape) // Red circle
+                                            .align(Alignment.TopEnd) // Align the dot to the top-right corner
+                                            .offset(x = (-4).dp, y = (4).dp) // Adjust the position slightly for overlap
+                                    )
+                                }
+                            }
                         },
                         actions = {
+
                             IconButton(enabled = connected,
                                        onClick = {
                                            shutdown()
                                        }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
-                                    contentDescription = "Shutdown"
+                                    contentDescription = stringResource(R.string.shutdown)
                                 )
                             }
 
@@ -117,6 +152,11 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                 Box(modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)) {
+
+                    if (showNewVersionDialog && latestVersion != null) {
+                        NewVersionDialog(latestVersion = latestVersion,
+                                         dismiss = { checkUpdateModel.hideNewVersionDialog() })
+                    }
                     HostEntriesList()
                 }
             }
@@ -197,6 +237,9 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
     private fun subscribeStates() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                checkUpdateModel.checkNewVersionAvailable()
+
                 ShizukuStateModel
                     .state
                     .combine(fileProviderConnected) { v1, v2 -> v1.looksGoodToMe && !v2 && fileProvider == null }
@@ -204,6 +247,7 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                     .collect {
                         bindFileProviderService()
                     }
+
             }
 
             lifecycle.repeatOnLifecycle(Lifecycle.State.DESTROYED) {

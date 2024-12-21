@@ -10,7 +10,10 @@ plugins {
     id("com.google.firebase.crashlytics")
     // Add the Performance Monitoring Gradle plugin
     id("com.google.firebase.firebase-perf")
+    id("io.sentry.android.gradle") version "4.14.1"
 }
+
+
 val VERSION = file(rootDir.resolve("VERSION")).readText().trim()
 val VERSION_CODE = VERSION.replace(".", "").toInt()
 project.logger.warn("Using versionName: $VERSION, versionCode: $VERSION_CODE")
@@ -109,6 +112,7 @@ android {
     }
 }
 
+
 dependencies {
 
     implementation(libs.core.ktx)
@@ -147,6 +151,10 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-perf")
+
+
+    implementation(libs.ktor.ktor.client.core)
+    implementation(libs.ktor.client.cio)
 
     // Barcode Scanner
     // implementation(libs.barcode.scanning)

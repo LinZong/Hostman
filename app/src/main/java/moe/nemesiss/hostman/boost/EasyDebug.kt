@@ -5,6 +5,8 @@ import android.util.Log
 import android.widget.Toast
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 
 object EasyDebug {
 
@@ -13,18 +15,21 @@ object EasyDebug {
         val msg = block()
         Log.i(tag, msg)
         Firebase.crashlytics.log("[INFO] $tag $msg")
+        Sentry.captureMessage(msg, SentryLevel.INFO)
     }
 
     fun warn(tag: String, block: () -> String) {
         val msg = block()
         Log.w(tag, msg)
         Firebase.crashlytics.log("[WARN] $tag $msg")
+        Sentry.captureMessage(msg, SentryLevel.WARNING)
     }
 
     fun warn(tag: String, t: Throwable, block: () -> String) {
         val msg = block()
         Log.w(tag, msg, t)
         Firebase.crashlytics.log("[WARN] $tag $msg")
+        Sentry.captureMessage("$msg\n\n${t.stackTraceToString()}", SentryLevel.WARNING)
     }
 
 
@@ -32,12 +37,14 @@ object EasyDebug {
         val msg = block()
         Log.e(tag, msg)
         Firebase.crashlytics.log("[ERROR] $tag $msg")
+        Sentry.captureMessage(msg, SentryLevel.WARNING)
     }
 
     fun error(tag: String, t: Throwable, block: () -> String) {
         val msg = block()
         Log.e(tag, msg, t)
         Firebase.crashlytics.log("[ERROR] $tag $msg \n${t.stackTraceToString()}")
+        Sentry.captureMessage("$msg\n\n${t.stackTraceToString()}", SentryLevel.ERROR)
     }
 
     fun toast(context: Context, block: () -> String) {

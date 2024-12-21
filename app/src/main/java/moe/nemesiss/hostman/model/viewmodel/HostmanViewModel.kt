@@ -52,11 +52,11 @@ class HostmanViewModel : ViewModel() {
             val begin = System.currentTimeMillis()
             val hostEntries = withContext(Dispatchers.IO) {
                 val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH)
-                EasyDebug.warn(TAG) { "Got host file content: $hostContent" }
+                EasyDebug.info(TAG) { "Got host file content: $hostContent" }
                 val nettyEntries = HostsFileParser.parse(StringReader(hostContent))
                 HostEntries.fromNettyHostFileEntries(nettyEntries)
             }
-            EasyDebug.warn(TAG) { "Got host file entries: $hostEntries" }
+            EasyDebug.info(TAG) { "Got host file entries: $hostEntries" }
             val end = System.currentTimeMillis()
             trace.stop()
             val cost = ((end - begin).toInt()).coerceAtLeast(500).milliseconds
@@ -70,7 +70,7 @@ class HostmanViewModel : ViewModel() {
                         fileProvider: IFileProvider,
                         previousHostEntry: HostEntry?,
                         newHostEntry: HostEntry) {
-        EasyDebug.warn(HostmanActivity.TAG) { "Host entry was edited: $newHostEntry" }
+        EasyDebug.info(HostmanActivity.TAG) { "Host entry was edited: $newHostEntry" }
         var entries: HostEntries? = hostFileEntries.value ?: return
         if (previousHostEntry != null) {
             entries = entries?.removeHostEntries(previousHostEntry)
@@ -110,7 +110,7 @@ class HostmanViewModel : ViewModel() {
         savingContent.value = true
         val hostFileContent = hostsFileEntries.generateHostFileContent()
         val fileOperationResult = withContext(Dispatchers.IO) {
-            EasyDebug.warn(HostmanActivity.TAG) { "Saving content: $hostFileContent to host file: ${HostEntries.HOST_FILE_PATH}" }
+            EasyDebug.info(HostmanActivity.TAG) { "Saving content: $hostFileContent to host file: ${HostEntries.HOST_FILE_PATH}" }
             val result = fileProvider.writeFileBytes(HostEntries.HOST_FILE_PATH,
                                                      hostFileContent.toByteArray(Charsets.UTF_8))
             val fileOperationResult = FileOperationResult.deserialize(result)

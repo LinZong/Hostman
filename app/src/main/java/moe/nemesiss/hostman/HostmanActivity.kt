@@ -238,7 +238,10 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                checkUpdateModel.checkNewVersionAvailable()
+                // Check new version in individual coroutine scope.
+                lifecycleScope.launch {
+                    checkUpdateModel.checkNewVersionAvailable()
+                }
 
                 ShizukuStateModel
                     .state

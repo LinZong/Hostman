@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.to
 import com.alibaba.fastjson2.toJSONString
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import moe.nemesiss.hostman.BuildConfig
 import moe.nemesiss.hostman.boost.EasyDebug
 import moe.nemesiss.hostman.model.*
@@ -34,8 +36,9 @@ object CheckUpdateService {
     }
 
     suspend fun checkNewVersionAvailable(): CheckVersionResult {
+
         try {
-            val latestVersion = getLatestAppVersion() ?: return NoNewVersionResult
+            val latestVersion = withContext(Dispatchers.IO) { getLatestAppVersion() } ?: return NoNewVersionResult
             val currentVersion = BuildConfig.VERSION_NAME.replace(".debug", "")
             if (latestVersion > AppVersion(currentVersion)) {
                 EasyDebug.info(TAG) { "New version available: $latestVersion, current version: $currentVersion" }

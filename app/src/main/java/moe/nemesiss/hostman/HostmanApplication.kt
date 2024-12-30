@@ -23,7 +23,6 @@ class HostmanApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        Sentry.configureScope { scope -> scope.level = SentryLevel.WARNING }
         Shizuku.addBinderReceivedListenerSticky(ShizukuStateModel)
         Shizuku.addBinderDeadListener(ShizukuStateModel)
         Shizuku.addRequestPermissionResultListener(ShizukuStateModel)

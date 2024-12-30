@@ -50,14 +50,15 @@ private object IPV4HostEntryValidator : HostEntryValidator {
     }
 
     private fun validateIPV4Address(address: String): IPAddressValidationResult {
+        val msg = "Invalid IPV4 address: $address"
         try {
             if (address.isEmpty()) {
                 return IPAddressInvalid("Address should not be empty")
             }
-            IPAddressString(address).toAddress(IPAddress.IPVersion.IPV4)
+            IPAddressString(address).toAddress(IPAddress.IPVersion.IPV4) ?: return IPAddressInvalid(msg)
             return IPAddressValid
         } catch (t: Throwable) {
-            return IPAddressInvalid("Invalid IPV4 address: $address")
+            return IPAddressInvalid(msg)
         }
     }
 }
@@ -75,14 +76,15 @@ private object IPV6HostEntryValidator : HostEntryValidator {
 
 
     private fun validateIPV6Address(address: String): IPAddressValidationResult {
+        val msg = "Invalid IPV6 address: $address"
         try {
             if (address.isEmpty()) {
                 return IPAddressInvalid("Address should not be empty")
             }
-            IPAddressString(address).toAddress(IPAddress.IPVersion.IPV6)
+            IPAddressString(address).toAddress(IPAddress.IPVersion.IPV6) ?: return IPAddressInvalid(msg)
             return IPAddressValid
         } catch (t: Throwable) {
-            return IPAddressInvalid("Invalid IPV6 address: $address")
+            return IPAddressInvalid(msg)
         }
     }
 }

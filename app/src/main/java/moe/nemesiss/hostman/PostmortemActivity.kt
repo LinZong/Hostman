@@ -35,6 +35,11 @@ class PostmortemActivity : AppCompatActivity(), FragmentOnAttachListener {
         supportFragmentManager.addFragmentOnAttachListener(this)
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        viewModel.stackTrace.value = intent.getStringExtra(STACKTRACE_KEY)
+    }
+
     private fun showSimpleActionPanel() {
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             val tx = supportFragmentManager.beginTransaction()

@@ -1,7 +1,7 @@
 @file:Suppress("PropertyName")
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import io.sentry.android.gradle.extensions.InstrumentationFeature
+import java.util.*
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
@@ -15,8 +15,11 @@ plugins {
 }
 
 
-val VERSION = file(rootDir.resolve("VERSION")).readText().trim()
-val VERSION_CODE = VERSION.replace(".", "").toInt()
+val versionProp = Properties()
+versionProp.load(rootDir.resolve("VERSION").reader(Charsets.UTF_8))
+val VERSION = versionProp.getProperty("version")
+val VERSION_CODE = versionProp.getProperty("versionCode").toInt()
+
 project.logger.warn("Using versionName: $VERSION, versionCode: $VERSION_CODE")
 
 fun isJenkins(): Boolean {
@@ -110,6 +113,7 @@ android {
         kotlinCompilerExtensionVersion = "1.5.1"
     }
 
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -157,6 +161,11 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-perf")
+
+
+    implementation(libs.coil)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
 
     implementation(libs.ktor.ktor.client.core)

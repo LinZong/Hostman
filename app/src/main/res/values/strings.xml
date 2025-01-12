@@ -6,4 +6,11 @@
     <string name="host_name">Host Name</string>
     <string name="download">Download</string>
     <string name="shutdown">Shutdown</string>
+    <string name="file_provider_dead_error_message">FileProvider dead unexpectedly. Please restart Shizuku and this app, then try again later.</string>
+    <string name="restart_app">Restart App</string>
+    <string name="oops_app_crashed">Oops! App was crashed</string>
+    <string name="sad_landscape">:(</string>
+    <string name="crash_details_for_nerds">Crash details for nerds</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

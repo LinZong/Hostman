@@ -1,3 +1,5 @@
+@file:Suppress("PropertyName", "SpellCheckingInspection")
+
 package moe.nemesiss.hostman.model
 
 import moe.nemesiss.hostman.proguard.NoProguard

@@ -1,10 +1,6 @@
 package moe.nemesiss.hostman
 
-import android.content.ComponentName
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -24,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,61 +26,57 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import moe.nemesiss.hostman.boost.EasyDebug
 import moe.nemesiss.hostman.model.HostEntries
 import moe.nemesiss.hostman.model.viewmodel.CheckUpdateViewModel
 import moe.nemesiss.hostman.model.viewmodel.HostmanViewModel
-import moe.nemesiss.hostman.model.viewmodel.ShizukuStateModel
-import moe.nemesiss.hostman.service.FileProviderService
 import moe.nemesiss.hostman.ui.compose.EditHostEntryDialog
 import moe.nemesiss.hostman.ui.compose.HostEntryItem
 import moe.nemesiss.hostman.ui.compose.NewVersionDialog
 import moe.nemesiss.hostman.ui.theme.HostEntriesGroupNameColor
 import moe.nemesiss.hostman.ui.theme.HostmanTheme
-import rikka.shizuku.Shizuku
-import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
-class HostmanActivity : ComponentActivity(), ServiceConnection {
+class HostmanActivity : ComponentActivity() {
 
     companion object {
 
         const val TAG = "HostmanActivity"
     }
 
-    private val vm by viewModels<HostmanViewModel>()
+    private val viewModel by viewModels<HostmanViewModel>()
 
     private val checkUpdateModel by viewModels<CheckUpdateViewModel>()
 
-    private var fileProvider: IFileProvider? = null
-
-    private val fileProviderConnected = MutableStateFlow(false)
-
-    private var shuttingdown = false
-
-    private val serviceArgs = createFileProviderServiceArgs()
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             HostmanTheme {
                 App()
             }
         }
+        viewModel.prepare(this)
         subscribeStates()
+    }
+
+    override fun onPause() {
+        EasyDebug.info(TAG) { "onPause" }
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        EasyDebug.info(TAG) { "onDestroy" }
+        super.onDestroy()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun App() {
-        val loading = vm.loading.observeAsState(true).value
-        val savingContent = vm.savingContent.observeAsState(false).value
-        val connected = fileProviderConnected.collectAsStateWithLifecycle().value
+        val loading = viewModel.loading.observeAsState(true).value
+        val savingContent = viewModel.savingContent.observeAsState(false).value
+        val connected = viewModel.fileProviderConnected.collectAsStateWithLifecycle().value
 
         val latestVersionAvailable = checkUpdateModel.hasLatestVersion.observeAsState(false).value
         val latestVersion = checkUpdateModel.latestVersion.observeAsState().value
@@ -121,20 +111,10 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                         },
                         actions = {
 
-                            IconButton(enabled = connected,
-                                       onClick = {
-                                           shutdown()
-                                       }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
-                                    contentDescription = stringResource(R.string.shutdown)
-                                )
-                            }
-
                             IconButton(enabled = !loading,
                                        onClick = {
-                                           vm.showEditDialog.value = true
-                                           vm.editingHostEntry.value = null
+                                           viewModel.showEditDialog.value = true
+                                           viewModel.editingHostEntry.value = null
                                        }) {
                                 Icon(
                                     imageVector = Icons.Filled.Add,
@@ -166,16 +146,16 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
 
     @Composable
     fun HostEntriesList() {
-        val loading = vm.loading.observeAsState().value ?: true
-        val entries = vm.hostFileEntries.observeAsState().value ?: HostEntries()
-        val showEditDialog = vm.showEditDialog.observeAsState().value ?: false
-        val editingHostEntry = vm.editingHostEntry.observeAsState().value
+        val loading = viewModel.loading.observeAsState().value ?: true
+        val entries = viewModel.hostFileEntries.observeAsState().value ?: HostEntries()
+        val showEditDialog = viewModel.showEditDialog.observeAsState().value ?: false
+        val editingHostEntry = viewModel.editingHostEntry.observeAsState().value
         val context = LocalContext.current
 
         PullToRefreshBox(
             isRefreshing = loading,
             onRefresh = {
-                fileProvider?.let { vm.loadHostFileEntries(it) }
+                viewModel.loadHostFileEntries(this)
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -184,12 +164,10 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
             if (showEditDialog) {
                 EditHostEntryDialog(entry = editingHostEntry,
                                     dismiss = {
-                                        vm.cleanEditingHostEntry()
+                                        viewModel.cleanEditingHostEntry()
                                     },
                                     confirmation = { prev, curr ->
-                                        fileProvider?.let { fp ->
-                                            vm.updateHostEntry(context, fp, prev, curr)
-                                        }
+                                        viewModel.updateHostEntry(context, prev, curr)
                                     })
             }
 
@@ -211,18 +189,15 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
                                     Box(modifier = Modifier
                                         .clickable {
                                             if (!loading) {
-                                                vm.startEditingHostEntry(entry)
+                                                viewModel.startEditingHostEntry(entry)
                                             }
                                         }
                                     ) {
                                         HostEntryItem(entryData = entry,
                                                       onRemoving = { removingEntry, promise ->
-                                                          fileProvider?.let { fp ->
-                                                              vm.removeHostEntry(context,
-                                                                                 fp,
-                                                                                 removingEntry,
-                                                                                 promise)
-                                                          }
+                                                          viewModel.removeHostEntry(context,
+                                                                                    removingEntry,
+                                                                                    promise)
                                                       })
                                     }
                                 }
@@ -235,82 +210,26 @@ class HostmanActivity : ComponentActivity(), ServiceConnection {
 
 
     private fun subscribeStates() {
+        // Check for updates.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
                 // Check new version in individual coroutine scope.
                 lifecycleScope.launch {
                     checkUpdateModel.checkNewVersionAvailable()
                 }
-
-                ShizukuStateModel
-                    .state
-                    .combine(fileProviderConnected) { v1, v2 -> v1.looksGoodToMe && !v2 && fileProvider == null }
-                    .filter { it }
-                    .collect {
-                        bindFileProviderService()
-                    }
-
-            }
-
-            lifecycle.repeatOnLifecycle(Lifecycle.State.DESTROYED) {
-                unbindFileProviderService()
             }
         }
 
+        // Watch and react for various fileProvider's state.
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                fileProviderConnected
+                viewModel.fileProviderConnected
                     .filter { it }
                     .collect {
-                        fileProvider?.let { provider -> vm.loadHostFileEntries(provider) }
+                        viewModel.loadHostFileEntries(this@HostmanActivity)
                     }
+
             }
-        }
-    }
-
-
-    private fun bindFileProviderService() {
-        Shizuku.bindUserService(serviceArgs, this)
-    }
-
-    private fun unbindFileProviderService() {
-        Shizuku.unbindUserService(serviceArgs, this, true)
-    }
-
-
-    private fun createFileProviderServiceArgs(): Shizuku.UserServiceArgs {
-        return Shizuku.UserServiceArgs(
-            ComponentName(BuildConfig.APPLICATION_ID, FileProviderService::class.java.name)
-        ).daemon(false)
-            .tag("FileProviderService")
-            .processNameSuffix("fileProvider")
-            .debuggable(true)
-            .version(BuildConfig.VERSION_CODE)
-    }
-
-    private fun shutdown() {
-        shuttingdown = true
-        unbindFileProviderService()
-    }
-
-    override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        if (service.pingBinder()) {
-            Log.e(TAG, "Got a valid binder from onServiceConnected: $name")
-            this.fileProvider = IFileProvider.Stub.asInterface(service)
-            this.fileProviderConnected.value = true
-        } else {
-            Log.e(TAG, "Got a broken binder from onServiceConnected: $name")
-            onServiceDisconnected(name)
-        }
-    }
-
-    override fun onServiceDisconnected(name: ComponentName) {
-        this.fileProvider = null
-        this.fileProviderConnected.value = false
-        if (this.shuttingdown) {
-            finish()
-            exitProcess(0)
         }
     }
 }

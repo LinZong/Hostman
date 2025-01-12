@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@android:color/transparent"
+              android:showDividers="middle"
+              android:divider="@drawable/divider_8dp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/stacktrace_container"
+            android:layout_weight="1">
+
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:fontFamily="@font/jbmono"
+                android:textColor="@android:color/white"
+                android:id="@+id/stacktrace_text"
+                />
+
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:id="@+id/restart_app"
+            android:text="@string/restart_app"/>
+
+
+</LinearLayout>

@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
             android:name=".HostmanApplication"
@@ -12,41 +12,59 @@
             android:fullBackupContent="@xml/backup_rules"
             android:icon="@mipmap/ic_launcher_2"
             android:label="@string/app_name"
+            android:largeHeap="true"
             android:roundIcon="@mipmap/ic_launcher_2"
             android:supportsRtl="true"
-            android:usesCleartextTraffic="true"
             android:theme="@style/Theme.Hostman"
+            android:usesCleartextTraffic="true"
             tools:targetApi="31">
 
         <!-- Required: set your sentry.io project identifier (DSN) -->
-        <meta-data android:name="io.sentry.dsn" android:value="https://63993efe71984e5dc9a5d48acefa2d19@o4508506718732288.ingest.us.sentry.io/4508506719715328" />
-
-        <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
-        <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="true" />
-        <!-- enable screenshot for crashes -->
-        <meta-data android:name="io.sentry.attach-screenshot" android:value="true" />
-        <!-- enable view hierarchy for crashes -->
-        <meta-data android:name="io.sentry.attach-view-hierarchy" android:value="true" />
-
-        <!-- enable the performance API by setting a sample-rate, adjust in production env -->
-        <meta-data android:name="io.sentry.traces.sample-rate" android:value="1.0" />
+        <meta-data
+                android:name="io.sentry.dsn"
+                android:value="https://63993efe71984e5dc9a5d48acefa2d19@o4508506718732288.ingest.us.sentry.io/4508506719715328"/> <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
+        <meta-data
+                android:name="io.sentry.traces.user-interaction.enable"
+                android:value="true"/> <!-- enable screenshot for crashes -->
+        <meta-data
+                android:name="io.sentry.attach-screenshot"
+                android:value="true"/> <!-- enable view hierarchy for crashes -->
+        <meta-data
+                android:name="io.sentry.attach-view-hierarchy"
+                android:value="true"/> <!-- enable the performance API by setting a sample-rate, adjust in production env -->
+        <meta-data
+                android:name="io.sentry.traces.sample-rate"
+                android:value="1"/>
 
         <activity
                 android:name=".HostmanActivity"
                 android:exported="false"
+                android:launchMode="singleTask"
                 android:theme="@style/Theme.Hostman"/>
-
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
+                android:launchMode="singleTask"
                 android:label="@string/app_name"
                 android:theme="@style/Theme.Hostman">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+                android:name=".PostmortemActivity"
+                android:launchMode="singleTask"
+                android:theme="@style/Theme.Hostman"
+                android:exported="false"/>
+
+        <service
+                android:name=".service.RestartService"
+                android:enabled="true"
+                android:exported="false"
+                android:process=":restart">
+        </service>
 
         <provider
                 android:name="rikka.shizuku.ShizukuProvider"

@@ -1,6 +1,7 @@
 package moe.nemesiss.hostman.boost
 
 import android.content.Context
+import android.provider.Telephony.Mms.Sent
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -44,6 +45,7 @@ object EasyDebug {
         Log.e(tag, msg, t)
         Firebase.crashlytics.log("[ERROR] $tag $msg \n${t.stackTraceToString()}")
         Sentry.captureMessage("$msg\n\n${t.stackTraceToString()}", SentryLevel.ERROR)
+        Sentry.captureException(t)
     }
 
     fun toast(context: Context, block: () -> String) {

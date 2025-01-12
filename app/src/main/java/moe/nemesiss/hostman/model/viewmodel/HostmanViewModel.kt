@@ -88,7 +88,7 @@ class HostmanViewModel : ViewModel(), ServiceConnection, DefaultLifecycleObserve
         editingHostEntry.value = null
     }
 
-    fun loadHostFileEntries(context: Context) {
+    fun loadHostFileEntries() {
         val fileProvider = fileProviderRef?.service ?: return
         viewModelScope.launch {
             loading.value = true

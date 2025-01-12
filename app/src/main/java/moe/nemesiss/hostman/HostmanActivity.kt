@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.flow.filter
@@ -76,7 +75,6 @@ class HostmanActivity : ComponentActivity() {
     fun App() {
         val loading = viewModel.loading.observeAsState(true).value
         val savingContent = viewModel.savingContent.observeAsState(false).value
-        val connected = viewModel.fileProviderConnected.collectAsStateWithLifecycle().value
 
         val latestVersionAvailable = checkUpdateModel.hasLatestVersion.observeAsState(false).value
         val latestVersion = checkUpdateModel.latestVersion.observeAsState().value
@@ -155,7 +153,7 @@ class HostmanActivity : ComponentActivity() {
         PullToRefreshBox(
             isRefreshing = loading,
             onRefresh = {
-                viewModel.loadHostFileEntries(this)
+                viewModel.loadHostFileEntries()
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -226,7 +224,7 @@ class HostmanActivity : ComponentActivity() {
                 viewModel.fileProviderConnected
                     .filter { it }
                     .collect {
-                        viewModel.loadHostFileEntries(this@HostmanActivity)
+                        viewModel.loadHostFileEntries()
                     }
 
             }

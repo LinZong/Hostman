@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Process
 import android.util.Log
 import androidx.annotation.Keep
-import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.toJSONString
 import moe.nemesiss.hostman.IFileProvider
 import moe.nemesiss.hostman.model.FileOperationResult

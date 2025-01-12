@@ -1,7 +1,6 @@
 package moe.nemesiss.hostman.boost
 
 import android.content.Context
-import android.provider.Telephony.Mms.Sent
 import android.util.Log
 import android.widget.Toast
 import com.google.firebase.crashlytics.ktx.crashlytics

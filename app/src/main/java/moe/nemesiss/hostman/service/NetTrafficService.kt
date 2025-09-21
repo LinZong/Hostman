@@ -13,13 +13,13 @@ import android.service.quicksettings.TileService
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.lifecycle.AtomicReference
 import kotlinx.coroutines.*
 import moe.nemesiss.hostman.boost.EasyNotification
 import moe.nemesiss.hostman.databinding.NetworkTrafficFloatingViewBinding
 import moe.nemesiss.hostman.ui.NetworkSpeed
-import androidx.core.content.edit
 
 
 class NetTrafficService : Service() {
@@ -94,8 +94,13 @@ class NetTrafficService : Service() {
         const val PREF_NAME = "net_traffic_prefs"
         const val PREF_KEY_RUNNING = "running"
 
+        // Broadcasts for QS tile updates
+        const val ACTION_NET_TRAFFIC_STATE = "moe.nemesiss.hostman.action.NET_TRAFFIC_STATE"
+        const val EXTRA_RUNNING = "running"
+
         fun start(ctx: Context) {
             ctx.startService(createIntent(ctx))
+
         }
 
         fun stop(ctx: Context) {
@@ -176,6 +181,8 @@ class NetTrafficService : Service() {
         // Update QS tile state
         getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, true) }
         TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
+        // Broadcast running state to QS tile
+        sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, true))
         EasyNotification.notifyNetTrafficServiceRunning(this)
     }
 
@@ -185,6 +192,8 @@ class NetTrafficService : Service() {
         // Update QS tile state
         getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, false) }
         TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
+        // Broadcast running state to QS tile
+        sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, false))
         stopSelf()
     }
 

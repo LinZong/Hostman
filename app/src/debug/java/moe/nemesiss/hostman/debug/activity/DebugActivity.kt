@@ -1,7 +1,5 @@
 package moe.nemesiss.hostman.debug.activity
 
-import android.app.usage.NetworkStatsManager
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
@@ -47,14 +45,15 @@ class DebugActivity : AppCompatActivity() {
         }
 
         binding.startNetworkMonitor.setOnClickListener {
-            if (Settings.canDrawOverlays(this)) {
-                if (EasyNotification.checkPostNotificationPermission(this)) {
+            val ctx = this
+            if (Settings.canDrawOverlays(ctx)) {
+                if (EasyNotification.checkPostNotificationPermission(ctx)) {
                     NetTrafficService.start(this)
                 } else {
-                    EasyNotification.ensurePostNotificationsPermission(this)
+                    EasyNotification.ensurePostNotificationsPermission(ctx)
                 }
             } else {
-                EasyLayout.openOverlayPermissionSetting(this)
+                EasyLayout.openOverlayPermissionSetting(ctx)
             }
         }
 
@@ -63,13 +62,6 @@ class DebugActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun showRxTxTemplateCode() {
-        val nsm = getSystemService<NetworkStatsManager>() ?: return
-        val wifiSummary =
-            nsm.querySummaryForDevice(ConnectivityManager.TYPE_WIFI, null, 0L, System.currentTimeMillis())
-
-    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         EasyNotification.handlePostNotificationsPermissionResult(this, requestCode, grantResults)

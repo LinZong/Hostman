@@ -75,9 +75,9 @@ object EasyNotification {
 
     fun createNetTrafficServiceRunningNotification(ctx: Context): Notification {
         val notification = NotificationCompat.Builder(ctx, NET_TRAFFIC_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.speed_24px)
             .setContentTitle(NET_TRAFFIC_CHANNEL_NAME)
-            .setContentText("Net Traffic Monitor Service is running")
+            .setContentText(ctx.getString(R.string.net_traffic_monitor_is_running))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -105,32 +105,36 @@ object EasyNotification {
      * Ensure POST_NOTIFICATIONS permission is granted (Android 13+).
      * - If granted or API < 33: returns immediately.
      * - If we should show rationale: open app notification settings to let user grant manually.
-     * - Otherwise: request the permission.
+     * - Otherwise: request the permission if current [context] is [Activity], or just open system settings for user to manually allow notifications.
      */
-    fun ensurePostNotificationsPermission(activity: Activity) {
+    fun ensurePostNotificationsPermission(context: Context) {
         if (Build.VERSION.SDK_INT < 33) {
             return
         }
 
         val granted = ContextCompat.checkSelfPermission(
-            activity, Manifest.permission.POST_NOTIFICATIONS
+            context, Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
         if (granted) {
             return
         }
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                activity, Manifest.permission.POST_NOTIFICATIONS
-            )
-        ) {
-            // Show system settings for user to manually allow notifications
-            openAppNotificationSettings(activity)
+        if (context is Activity) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(context,
+                                                                    Manifest.permission.POST_NOTIFICATIONS)
+            ) {
+                // Show system settings for user to manually allow notifications
+                openAppNotificationSettings(context)
+            } else {
+                ActivityCompat.requestPermissions(
+                    context,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    REQ_POST_NOTIFICATIONS
+                )
+            }
         } else {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                REQ_POST_NOTIFICATIONS
-            )
+            // Show system settings for user to manually allow notifications
+            openAppNotificationSettings(context)
         }
     }
 
@@ -172,7 +176,7 @@ object EasyNotification {
         }
 
         runCatching {
-            ctx.startActivity(intent)
+            EasyIntent.startActivity(ctx, intent)
         }.onFailure {
             // Fallback to app details settings if notification settings action isn't supported
             val fallback = Intent(
@@ -181,7 +185,7 @@ object EasyNotification {
             ).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
-            runCatching { ctx.startActivity(fallback) }
+            runCatching { EasyIntent.startActivity(ctx, fallback) }
         }
     }
 }

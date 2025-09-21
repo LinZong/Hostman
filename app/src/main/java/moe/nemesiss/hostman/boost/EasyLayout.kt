@@ -2,11 +2,11 @@ package moe.nemesiss.hostman.boost
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.Settings
 import android.view.WindowInsets
+import androidx.core.net.toUri
 import androidx.core.util.TypedValueCompat
 
 object EasyLayout {
@@ -26,8 +26,9 @@ object EasyLayout {
 
     fun openOverlayPermissionSetting(ctx: Context): Boolean {
         if (!(Settings.canDrawOverlays(ctx))) {
-            ctx.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                     Uri.parse("package:${ctx.packageName}")))
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${ctx.packageName}".toUri())
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            EasyIntent.startActivity(ctx, intent)
             return true
         }
         return false

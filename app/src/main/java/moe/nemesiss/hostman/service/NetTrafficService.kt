@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.view.*
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.getSystemService
 import androidx.lifecycle.AtomicReference
@@ -244,8 +243,8 @@ class NetTrafficService : Service() {
             }
         })
 
-        val closeWindow = view.findViewById<ImageView>(moe.nemesiss.hostman.R.id.close_window)
-        closeWindow?.setOnClickListener { stopNetTrafficMonitor() }
+        val closeWindow = binding.closeWindow
+        closeWindow.setOnClickListener { stopNetTrafficMonitor() }
     }
 
     private fun cleanup() {

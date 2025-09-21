@@ -1,12 +1,15 @@
 package moe.nemesiss.hostman.service
 
+import android.annotation.SuppressLint
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.net.TrafficStats
 import android.os.Build
 import android.os.IBinder
+import android.service.quicksettings.TileService
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -16,6 +19,7 @@ import kotlinx.coroutines.*
 import moe.nemesiss.hostman.boost.EasyNotification
 import moe.nemesiss.hostman.databinding.NetworkTrafficFloatingViewBinding
 import moe.nemesiss.hostman.ui.NetworkSpeed
+import androidx.core.content.edit
 
 
 class NetTrafficService : Service() {
@@ -30,12 +34,18 @@ class NetTrafficService : Service() {
         suspend fun refresh(): Boolean {
             return withContext(Dispatchers.IO) {
                 try {
-
                     prevWlan = wlan
-                    wlan = TrafficStats.getTxBytes(WLAN_IF_NAME) + TrafficStats.getRxBytes(WLAN_IF_NAME)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        // API 31+: Per-interface stats available
+                        wlan = TrafficStats.getTxBytes(WLAN_IF_NAME) + TrafficStats.getRxBytes(WLAN_IF_NAME)
+                    } else {
+                        // Fallback for older APIs: approximate Wi‑Fi as total - mobile
+                        val total = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes()
+                        val mobileTotal = TrafficStats.getMobileRxBytes() + TrafficStats.getMobileTxBytes()
+                        wlan = (total - mobileTotal).coerceAtLeast(0L)
+                    }
 
                     prevMobile = mobile
-
                     mobile = TrafficStats.getMobileRxBytes() + TrafficStats.getMobileTxBytes()
 
                     true
@@ -49,13 +59,13 @@ class NetTrafficService : Service() {
         fun getWlanRxTxBytes(): Long? {
             val current = wlan ?: return null
             val prev = prevWlan ?: return null
-            return current - prev
+            return (current - prev).coerceAtLeast(0L)
         }
 
         fun getMobileDataRxTxBytes(): Long? {
             val current = mobile ?: return null
             val prev = prevMobile ?: return null
-            return current - prev
+            return (current - prev).coerceAtLeast(0L)
         }
 
         fun reset() {
@@ -79,6 +89,11 @@ class NetTrafficService : Service() {
         const val ACTION_START = "start"
         const val ACTION_STOP = "stop"
         const val REFRESH_INTERVALS = 2000L
+
+        // Preferences for QS Tile state
+        const val PREF_NAME = "net_traffic_prefs"
+        const val PREF_KEY_RUNNING = "running"
+
         fun start(ctx: Context) {
             ctx.startService(createIntent(ctx))
         }
@@ -158,12 +173,18 @@ class NetTrafficService : Service() {
         createFloatingView()
         startRefreshJob()
         state.set(State.STARTED)
+        // Update QS tile state
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, true) }
+        TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
         EasyNotification.notifyNetTrafficServiceRunning(this)
     }
 
     private fun onNetTrafficMonitorStopped() {
         cleanup()
         state.set(State.IDLE)
+        // Update QS tile state
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, false) }
+        TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
         stopSelf()
     }
 
@@ -203,6 +224,7 @@ class NetTrafficService : Service() {
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun createFloatingView() {
         val wm = this.windowManager ?: return
         removeViewIfNecessary()

@@ -13,4 +13,5 @@
     <string name="crash_details_for_nerds">Crash details for nerds</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="network_traffic_monitor_qs_name">Net Traffic Monitor</string>
 </resources>

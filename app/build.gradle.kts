@@ -64,12 +64,12 @@ android {
         }
     }
     namespace = "moe.nemesiss.hostman"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "moe.nemesiss.hostman"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 35
         versionCode = VERSION_CODE
         versionName = VERSION
         multiDexEnabled = true

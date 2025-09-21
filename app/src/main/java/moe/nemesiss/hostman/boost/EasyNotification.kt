@@ -67,6 +67,7 @@ object EasyNotification {
         }
 
         val notification = createNetTrafficServiceRunningNotification(service)
+
         service.startForeground(NET_TRAFFIC_SERVICE_NOTIFICATION_ID,
                                 notification,
                                 ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
@@ -107,12 +108,16 @@ object EasyNotification {
      * - Otherwise: request the permission.
      */
     fun ensurePostNotificationsPermission(activity: Activity) {
-        if (Build.VERSION.SDK_INT < 33) return
+        if (Build.VERSION.SDK_INT < 33) {
+            return
+        }
 
         val granted = ContextCompat.checkSelfPermission(
             activity, Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
-        if (granted) return
+        if (granted) {
+            return
+        }
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(
                 activity, Manifest.permission.POST_NOTIFICATIONS

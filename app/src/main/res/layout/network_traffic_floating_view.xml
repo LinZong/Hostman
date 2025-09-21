@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:padding="8dp"
+                android:orientation="vertical"
+                android:background="@color/transparent_black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+    <LinearLayout
+            android:id="@+id/indicator_container"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:gravity="center_vertical"
+                android:drawableLeft="@drawable/wifi_24dp"
+                android:drawablePadding="4dp"
+                android:id="@+id/wlan_speed"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/jbmono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                app:textAllCaps="false"
+                android:includeFontPadding="false"
+                android:text=""/>
+
+        <TextView
+                android:gravity="center_vertical"
+                android:textColor="@android:color/white"
+                android:drawableLeft="@drawable/signal_cellular_4"
+                android:fontFamily="@font/jbmono"
+                android:drawablePadding="4dp"
+                android:id="@+id/mobile_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                app:textAllCaps="false"
+                android:includeFontPadding="false"
+                android:text=""/>
+
+    </LinearLayout>
+
+    <ImageView
+            android:layout_toEndOf="@id/indicator_container"
+            android:layout_marginStart="16dp"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/cancel_24dp"
+            android:id="@+id/close_window"
+            />
+
+</RelativeLayout>

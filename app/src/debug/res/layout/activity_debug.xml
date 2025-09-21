@@ -41,5 +41,30 @@
                 android:textColor="@android:color/white"
                 android:text="Simulate a crash"/>
 
+        <com.google.android.material.button.MaterialButton
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="false"
+                android:id="@+id/ime_picker"
+                android:textColor="@android:color/white"
+                android:text="Show IME Picker"/>
+
+        <com.google.android.material.button.MaterialButton
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/start_network_monitor"
+                android:textColor="@android:color/white"
+                android:text="Start Network Monitor Service"/>
+
+        <com.google.android.material.button.MaterialButton
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/stop_network_monitor"
+                android:textColor="@android:color/white"
+                android:text="Stop Network Monitor Service"/>
+
     </LinearLayout>
 </ScrollView>

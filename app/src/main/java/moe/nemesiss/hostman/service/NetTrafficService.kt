@@ -190,10 +190,8 @@ class NetTrafficService : Service() {
         cleanup()
         state.set(State.IDLE)
         // Update QS tile state
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, false) }
         TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
         // Broadcast running state to QS tile
-        sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, false))
         stopSelf()
     }
 
@@ -282,6 +280,8 @@ class NetTrafficService : Service() {
         cancelPreviousJob()
         removeViewIfNecessary()
         EasyNotification.removeNetTrafficServiceRunningNotification(this)
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, false) }
+        sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, false))
     }
 
     private fun cancelPreviousJob() {

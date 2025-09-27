@@ -115,7 +115,7 @@ class HostmanActivity : ComponentActivity() {
 
                             IconButton(enabled = true,
                                        onClick = {
-                                           NetTrafficService.start(context)
+                                           NetTrafficService.ensurePermissionAndStart(context)
                                        }) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.speed_24px),

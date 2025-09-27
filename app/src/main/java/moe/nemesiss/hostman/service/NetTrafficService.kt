@@ -9,6 +9,7 @@ import android.graphics.PixelFormat
 import android.net.TrafficStats
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.service.quicksettings.TileService
 import android.util.Log
 import android.view.*
@@ -20,6 +21,7 @@ import com.alibaba.fastjson2.parseObject
 import com.alibaba.fastjson2.toJSONString
 import com.google.firebase.perf.metrics.AddTrace
 import kotlinx.coroutines.*
+import moe.nemesiss.hostman.boost.EasyLayout
 import moe.nemesiss.hostman.boost.EasyNotification
 import moe.nemesiss.hostman.databinding.NetworkTrafficFloatingViewBinding
 import moe.nemesiss.hostman.ui.NetworkSpeed
@@ -106,7 +108,18 @@ class NetTrafficService : Service() {
 
         fun start(ctx: Context) {
             ctx.startService(createIntent(ctx))
+        }
 
+        fun ensurePermissionAndStart(ctx: Context) {
+            if (Settings.canDrawOverlays(ctx)) {
+                if (EasyNotification.checkPostNotificationPermission(ctx)) {
+                    start(ctx)
+                } else {
+                    EasyNotification.ensurePostNotificationsPermission(ctx)
+                }
+            } else {
+                EasyLayout.openOverlayPermissionSetting(ctx)
+            }
         }
 
         fun stop(ctx: Context) {

@@ -2,13 +2,11 @@ package moe.nemesiss.hostman.debug.activity
 
 import android.os.Bundle
 import android.os.Process
-import android.provider.Settings
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import moe.nemesiss.hostman.PostmortemActivity
-import moe.nemesiss.hostman.boost.EasyLayout
 import moe.nemesiss.hostman.boost.EasyNotification
 import moe.nemesiss.hostman.boost.EasyProcess
 import moe.nemesiss.hostman.databinding.ActivityDebugBinding
@@ -46,15 +44,7 @@ class DebugActivity : AppCompatActivity() {
 
         binding.startNetworkMonitor.setOnClickListener {
             val ctx = this
-            if (Settings.canDrawOverlays(ctx)) {
-                if (EasyNotification.checkPostNotificationPermission(ctx)) {
-                    NetTrafficService.start(this)
-                } else {
-                    EasyNotification.ensurePostNotificationsPermission(ctx)
-                }
-            } else {
-                EasyLayout.openOverlayPermissionSetting(ctx)
-            }
+            NetTrafficService.ensurePermissionAndStart(ctx)
         }
 
         binding.stopNetworkMonitor.setOnClickListener {

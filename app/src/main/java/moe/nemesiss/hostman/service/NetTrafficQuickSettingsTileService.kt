@@ -49,8 +49,7 @@ class NetTrafficQuickSettingsTileService : TileService() {
                                            ContextCompat.RECEIVER_NOT_EXPORTED)
             receiverRegistered = true
         }
-        val running = getSharedPreferences(NetTrafficService.PREF_NAME, MODE_PRIVATE)
-            .getBoolean(NetTrafficService.PREF_KEY_RUNNING, false)
+        val running = NetTrafficService.isRunning()
         val tile = qsTile ?: return
         tile.state = if (running) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.icon = Icon.createWithResource(this, moe.nemesiss.hostman.R.drawable.speed_24px)

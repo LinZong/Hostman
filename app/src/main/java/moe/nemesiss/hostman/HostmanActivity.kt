@@ -18,7 +18,9 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +33,7 @@ import moe.nemesiss.hostman.boost.EasyDebug
 import moe.nemesiss.hostman.model.HostEntries
 import moe.nemesiss.hostman.model.viewmodel.CheckUpdateViewModel
 import moe.nemesiss.hostman.model.viewmodel.HostmanViewModel
+import moe.nemesiss.hostman.service.NetTrafficService
 import moe.nemesiss.hostman.ui.compose.EditHostEntryDialog
 import moe.nemesiss.hostman.ui.compose.HostEntryItem
 import moe.nemesiss.hostman.ui.compose.NewVersionDialog
@@ -79,6 +82,7 @@ class HostmanActivity : ComponentActivity() {
         val latestVersionAvailable = checkUpdateModel.hasLatestVersion.observeAsState(false).value
         val latestVersion = checkUpdateModel.latestVersion.observeAsState().value
         val showNewVersionDialog = checkUpdateModel.newVersionAvailableDialogShown.observeAsState(false).value
+        val context = LocalContext.current
 
         Scaffold(
             topBar = {
@@ -108,6 +112,16 @@ class HostmanActivity : ComponentActivity() {
                             }
                         },
                         actions = {
+
+                            IconButton(enabled = true,
+                                       onClick = {
+                                           NetTrafficService.start(context)
+                                       }) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.speed_24px),
+                                    contentDescription = "Net Traffic Monitor",
+                                )
+                            }
 
                             IconButton(enabled = !loading,
                                        onClick = {

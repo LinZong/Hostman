@@ -16,6 +16,9 @@ import android.widget.Toast
 import androidx.core.content.edit
 import androidx.core.content.getSystemService
 import androidx.lifecycle.AtomicReference
+import com.alibaba.fastjson2.parseObject
+import com.alibaba.fastjson2.toJSONString
+import com.google.firebase.perf.metrics.AddTrace
 import kotlinx.coroutines.*
 import moe.nemesiss.hostman.boost.EasyNotification
 import moe.nemesiss.hostman.databinding.NetworkTrafficFloatingViewBinding
@@ -92,11 +95,14 @@ class NetTrafficService : Service() {
 
         // Preferences for QS Tile state
         const val PREF_NAME = "net_traffic_prefs"
-        const val PREF_KEY_RUNNING = "running"
+        const val SP_KEY_INDICATOR_POSITION = "indicator_position"
 
         // Broadcasts for QS tile updates
         const val ACTION_NET_TRAFFIC_STATE = "moe.nemesiss.hostman.action.NET_TRAFFIC_STATE"
         const val EXTRA_RUNNING = "running"
+
+        private val state = AtomicReference<State>(State.IDLE)
+
 
         fun start(ctx: Context) {
             ctx.startService(createIntent(ctx))
@@ -105,6 +111,10 @@ class NetTrafficService : Service() {
 
         fun stop(ctx: Context) {
             ctx.startService(createIntent(ctx, false))
+        }
+
+        fun isRunning(): Boolean {
+            return state.get() == State.STARTED
         }
 
         private fun createIntent(ctx: Context, start: Boolean = true): Intent {
@@ -126,8 +136,6 @@ class NetTrafficService : Service() {
     private var windowManager: WindowManager? = null
 
     private var floatingViewBinding: NetworkTrafficFloatingViewBinding? = null
-
-    private val state = AtomicReference<State>(State.IDLE)
 
 
     private val model = NetTrafficStatsModel()
@@ -178,8 +186,6 @@ class NetTrafficService : Service() {
         createFloatingView()
         startRefreshJob()
         state.set(State.STARTED)
-        // Update QS tile state
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, true) }
         TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
         // Broadcast running state to QS tile
         sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, true))
@@ -193,7 +199,6 @@ class NetTrafficService : Service() {
         // Broadcast running state to QS tile
         stopSelf()
     }
-
 
     private fun startRefreshJob() {
         cancelPreviousJob()
@@ -236,6 +241,11 @@ class NetTrafficService : Service() {
         removeViewIfNecessary()
 
         val params = createLayoutParams()
+        val position = getSavedIndicatorPosition()
+        val (x, y) = position
+        params.x = x
+        params.y = y
+
         val binding = NetworkTrafficFloatingViewBinding.inflate(LayoutInflater.from(this))
         val view = binding.root
         wm.addView(view, params)
@@ -264,6 +274,7 @@ class NetTrafficService : Service() {
                         params.x = initialX + dx
                         params.y = initialY + dy
                         wm.updateViewLayout(view, params)
+                        saveIndicatorPosition(params.x, params.y)
                         return true
                     }
                 }
@@ -275,11 +286,31 @@ class NetTrafficService : Service() {
         closeWindow.setOnClickListener { stopNetTrafficMonitor() }
     }
 
+    @AddTrace(name = "NetTrafficService_saveIndicatorPosition")
+    private fun saveIndicatorPosition(x: Int, y: Int) {
+        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit {
+            putString(SP_KEY_INDICATOR_POSITION, mapOf("x" to x, "y" to y).toJSONString())
+        }
+    }
+
+    @AddTrace(name = "NetTrafficService_getSavedIndicatorPosition")
+    private fun getSavedIndicatorPosition(): Pair<Int, Int> {
+        val json = getSharedPreferences(PREF_NAME, MODE_PRIVATE)
+            .getString(SP_KEY_INDICATOR_POSITION, "{}")
+            ?.parseObject() ?: return 0 to 0
+
+        val x = json.getInteger("x")
+        val y = json.getInteger("y")
+        if (x != null && y != null) {
+            return x to y
+        }
+        return 0 to 0
+    }
+
     private fun cleanup() {
         cancelPreviousJob()
         removeViewIfNecessary()
         EasyNotification.removeNetTrafficServiceRunningNotification(this)
-        getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit { putBoolean(PREF_KEY_RUNNING, false) }
         TileService.requestListeningState(this, ComponentName(this, NetTrafficQuickSettingsTileService::class.java))
         sendBroadcast(Intent(ACTION_NET_TRAFFIC_STATE).setPackage(packageName).putExtra(EXTRA_RUNNING, false))
     }

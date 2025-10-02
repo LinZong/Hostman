@@ -143,7 +143,8 @@ class HostmanViewModel : ViewModel(), ServiceConnection, DefaultLifecycleObserve
 
     @AddTrace(name = "load_host_file_entries")
     private fun getHostEntries(fileProvider: IFileProvider): HostEntries {
-        val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH)
+        // FIX: https://nemesisslin.sentry.io/issues/6908404397/events/latest/?query=is%3Aunresolved&referrer=latest-event
+        val hostContent = fileProvider.getFileTextContent(HostEntries.HOST_FILE_PATH) ?: ""
         EasyDebug.info(TAG) { "Got host file content: $hostContent" }
         val nettyEntries = HostsFileParser.parse(StringReader(hostContent))
         return HostEntries.fromNettyHostFileEntries(nettyEntries)

@@ -66,5 +66,9 @@
                 android:textColor="@android:color/white"
                 android:text="Stop Network Monitor Service"/>
 
+        <TextView
+                android:id="@+id/markdown_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
     </LinearLayout>
 </ScrollView>

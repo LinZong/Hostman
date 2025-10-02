@@ -171,19 +171,10 @@ dependencies {
     implementation(libs.ktor.ktor.client.core)
     implementation(libs.ktor.client.cio)
 
-    // Barcode Scanner
-    // implementation(libs.barcode.scanning)
-
-
-    // CameraX
-    //    val cameraxVersion = "1.2.2"
-    //    implementation("androidx.camera:camera-core:${cameraxVersion}")
-    //    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
-    //    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
-    //    implementation("androidx.camera:camera-video:${cameraxVersion}")
-    //
-    //    implementation("androidx.camera:camera-view:${cameraxVersion}")
-    //    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
+    val markwonVersion = "4.6.2"
+    implementation("io.noties.markwon:core:${markwonVersion}")
+    implementation("io.noties.markwon:image:${markwonVersion}")
+    implementation("io.noties.markwon:html:${markwonVersion}")
 
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

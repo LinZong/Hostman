@@ -43,7 +43,7 @@ fun NewVersionDialog(latestVersion: AppVersion, dismiss: () -> Unit = {}) {
             }
         },
         text = {
-            val body = latestVersion.release?.body ?: "No description for this version."
+            val body = latestVersion.release?.body ?: stringResource(R.string.no_description_for_this_version)
             AndroidView(modifier = Modifier.fillMaxWidth(),
                         onReset = { it.text = "" },
                         factory = { ctx -> TextView(ctx).apply { markwon.setMarkdown(this, body) } },
